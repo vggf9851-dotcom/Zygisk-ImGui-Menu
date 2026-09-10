@@ -1,0 +1,33 @@
+name: Build Mod Menu
+
+on:
+ workflow_dispatch:
+ push:
+  branches: [ main]
+
+jobs:
+ build:
+  runs-on: ubuntu-latest
+  steps:
+   - name: Checkout
+     uses: actions/checkout@v4
+
+   - name: Setup Java
+     uses: actions/setup-java@v4
+     with:
+      distribution: 'temurin'
+      java-version: '17'
+
+   - name: Setup Gradle
+     uses: gradle/actions/setup-gradle@v3
+  
+   - name: Build Module
+     run: |
+       chmod +x gradlew
+       ./gradlew : module:assembleRelease
+
+   - name: Upload ZIP
+     uses: actions/upload-artifact@v4
+     with:
+      name: modmenu-zip
+      path: out/*.zip
