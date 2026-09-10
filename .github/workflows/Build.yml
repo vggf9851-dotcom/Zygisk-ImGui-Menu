@@ -21,10 +21,10 @@ jobs:
    - name: Setup Gradle
      uses: gradle/actions/setup-gradle@v3
 
-   - name: Install Android CMake
+   - name: Install Android CMake and NDK
      run: |
-      yes | sdkmanager --licenses || true
       sdkmanager "cmake;3.18.1" "ndk;23.1.7779620"
+  
    - name: Build Module
      run: |
        chmod +x gradlew
