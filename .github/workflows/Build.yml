@@ -23,8 +23,7 @@ jobs:
 
    - name: Install Android CMake
      run: |
-      sudo apt-get update
-      sudo apt-get install -y cmake
+      sdkmanager "cmake;3.18.1"
    - name: Build Module
      run: |
        chmod +x gradlew
