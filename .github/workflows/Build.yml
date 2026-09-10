@@ -24,7 +24,7 @@ jobs:
    - name: Build Module
      run: |
        chmod +x gradlew
-       ./gradlew : module:assembleRelease
+       ./gradlew : module:assembleRelease --stacktrace
 
    - name: Upload ZIP
      uses: actions/upload-artifact@v4
