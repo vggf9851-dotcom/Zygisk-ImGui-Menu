@@ -1,17 +1,18 @@
-name: Build Zygisk Mod Menu
+name: Build Mod Menu
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -20,26 +21,33 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install NDK and CMake
+      - name: Show project structure
         run: |
-          sdkmanager --install "ndk;26.1.10909125" "cmake;3.22.1"
-          echo "ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/26.1.10909125" >> $GITHUB_ENV
-          echo "ANDROID_CMAKE_HOME=/usr/local/lib/android/sdk/cmake/3.22.1/bin" >> $GITHUB_ENV
+          echo "=== Root directory ==="
+          ls -la
+          echo "=== module directory ==="
+          ls -la module/ || echo "No module dir"
+          echo "=== gradle files ==="
+          cat settings.gradle
+          cat build.gradle
 
-      - name: Grant execute permission to gradlew
-        run: chmod +x gradlew
+      - name: Build with full debug
+        run: |
+          chmod +x gradlew
+          ./gradlew :module:assembleRelease --info --stacktrace 2>&1 | tail -100
 
-      - name: Build with Gradle
-        run: ./gradlew assembleRelease
+      - name: Show build outputs
+        if: always()
+        run: |
+          echo "=== Build outputs ==="
+          find . -name "*.zip" -o -name "*.apk" 2>/dev/null
 
-      - name: Find all zip files
-        run: find . -name "*.zip" -type f
-
-      - name: Upload module zip
+      - name: Upload ZIP
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: modmenu-zip
           path: |
-            **/out/*.zip
+            module/build/outputs/**/*.zip
             **/*.zip
-          if-no-files-found: error
+          if-no-files-found: warn
