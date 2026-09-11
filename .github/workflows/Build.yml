@@ -1,50 +1,36 @@
-name: Build Mod Menu
+name: Build Zygisk Mod Menu
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
 
-      - name: Build Module
-        run: |
-          chmod +x gradlew
-          ./gradlew :module:assembleRelease --stacktrace
+      - name: Build with Gradle
+        run: ./gradlew assembleRelease
 
-      - name: Find all ZIP files
-        if: always()
-        run: |
-          echo "=== Searching for ZIP files ==="
-          find . -name "*.zip" -type f 2>/dev/null
-          echo "=== Searching for outputs directory ==="
-          find . -type d -name "outputs" 2>/dev/null
-          echo "=== Module build directory ==="
-          ls -la module/build/ 2>/dev/null || echo "No module/build"
-          echo "=== Out directory ==="
-          ls -la out/ 2>/dev/null || echo "No out/"
+      - name: Find all zip files
+        run: find . -name "*.zip" -type f
 
-      - name: Upload Everything ZIP
-        if: always()
+      - name: Upload module zip
         uses: actions/upload-artifact@v4
         with:
           name: modmenu-zip
           path: |
+            **/out/*.zip
             **/*.zip
-            !**/gradle-wrapper.zip
-            !**/gradle*.zip
           if-no-files-found: error
