@@ -42,12 +42,13 @@ jobs:
           echo "=== Build outputs ==="
           find . -name "*.zip" -o -name "*.apk" 2>/dev/null
 
-      - name: Upload ZIP
+      - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: modmenu-zip
+          name: modmenu-apk
           path: |
-            module/build/outputs/**/*.zip
-            **/*.zip
-          if-no-files-found: warn
+            module/build/outputs/apk/release/*.apk
+            module/build/outputs/**/*.apk
+            **/*.apk
+          if-no-files-found: error
