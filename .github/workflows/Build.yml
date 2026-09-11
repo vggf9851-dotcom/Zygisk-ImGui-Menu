@@ -1,41 +1,55 @@
 name: Build Mod Menu
 
 on:
- workflow_dispatch:
- push:
-  branches: [ main]
-  
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
 jobs:
- build:
-  runs-on: ubuntu-latest
-  
-  steps:
-   - name: Checkout
-     uses: actions/checkout@v4
-   - name: Setup Java
-     uses: actions/setup-java@v4
-     with:
-      distribution: 'temurin'
-      java-version: '17'
-   - name: Setup Android SDK
-     uses: android-actions/setup-android@v4
-     with:
-      packages: ''
-   - name: Add Android SDK tools to PATH
-     run: |
-      echo "$ANDROID_SDK_ROOT/cmdline-tools/20.0/bin" >> "$GITHUB_PATH"
-      echo "$ANDROID_SDK_ROOT/platform-tools" >>> "$GITHUB_PATH"
-   - name: Setup Gradle
-     uses: gradle/actions/setup-gradle@v3
-   - name: Install Android CMake and NDK
-     run: |
-      sdkmanager --install "cmake;3.18.1" "ndk; 23.1.7779620"
-   - name: Build Module
-     run: |
-      chmod +x gradlew
-      ./gradlew : module:assembleRelease
-   - name: Upload ZIP
-     uses: actions/upload-artifact@v4
-     with:
-      name: modmenu-zip
-      path: out/*.zip
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Show project structure
+        run: |
+          echo "=== Root directory ==="
+          ls -la
+          echo "=== module directory ==="
+          ls -la module/ || echo "No module dir"
+          echo "=== gradle files ==="
+          cat settings.gradle
+          cat build.gradle
+
+      - name: Build with full debug
+        run: |
+          chmod +x gradlew
+          ./gradlew :module:assembleRelease --info --stacktrace 2>&1 | tail -100
+
+      - name: Show build outputs
+        if: always()
+        run: |
+          echo "=== Build outputs ==="
+          find . -name "*.zip" -o -name "*.apk" 2>/dev/null
+          find . -path "*/outputs/*" -type f 2>/dev/null | head -20
+
+      - name: Upload ZIP
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: modmenu-zip
+          path: |
+            out/*.zip
+            module/build/outputs/**/*.zip
+            **/*.zip
+          if-no-files-found: warn
