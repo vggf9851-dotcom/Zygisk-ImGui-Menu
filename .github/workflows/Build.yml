@@ -34,7 +34,7 @@ jobs:
       - name: Build with full debug
         run: |
           chmod +x gradlew
-          ./gradlew :module:assembleRelease --info --stacktrace 2>&1 | tail -100
+          ./gradlew :module:assembleRelease --info --stacktrace
 
       - name: Show build outputs
         if: always()
