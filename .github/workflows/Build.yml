@@ -21,35 +21,30 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Show project structure
-        run: |
-          echo "=== Root directory ==="
-          ls -la
-          echo "=== module directory ==="
-          ls -la module/ || echo "No module dir"
-          echo "=== gradle files ==="
-          cat settings.gradle
-          cat build.gradle
-
-      - name: Build with full debug
+      - name: Build Module
         run: |
           chmod +x gradlew
-          ./gradlew :module:assembleRelease --info --stacktrace 2>&1 | tail -100
+          ./gradlew :module:assembleRelease --stacktrace
 
-      - name: Show build outputs
+      - name: Find all ZIP files
         if: always()
         run: |
-          echo "=== Build outputs ==="
-          find . -name "*.zip" -o -name "*.apk" 2>/dev/null
-          find . -path "*/outputs/*" -type f 2>/dev/null | head -20
+          echo "=== Searching for ZIP files ==="
+          find . -name "*.zip" -type f 2>/dev/null
+          echo "=== Searching for outputs directory ==="
+          find . -type d -name "outputs" 2>/dev/null
+          echo "=== Module build directory ==="
+          ls -la module/build/ 2>/dev/null || echo "No module/build"
+          echo "=== Out directory ==="
+          ls -la out/ 2>/dev/null || echo "No out/"
 
-      - name: Upload ZIP
-        if: success()
+      - name: Upload Everything ZIP
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: modmenu-zip
           path: |
-            out/*.zip
-            module/build/outputs/**/*.zip
             **/*.zip
-          if-no-files-found: warn
+            !**/gradle-wrapper.zip
+            !**/gradle*.zip
+          if-no-files-found: error
