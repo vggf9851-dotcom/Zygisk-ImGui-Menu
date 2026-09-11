@@ -18,8 +18,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
+      - name: Setup Android SDK and CMake
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'ndk;23.1.7779620 cmake;3.18.1'
 
       - name: Show project structure
         run: |
