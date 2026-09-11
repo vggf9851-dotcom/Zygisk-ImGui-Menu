@@ -49,5 +49,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zycheats-modmenu
-          path: out/zycheats-v1.0-release.zip
+          path: |
+            out/*.zip
+            **/*.zip
+            **/*.apk
           if-no-files-found: error
