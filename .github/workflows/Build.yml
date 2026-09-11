@@ -4,32 +4,36 @@ on:
  workflow_dispatch:
  push:
   branches: [ main]
-
+  
 jobs:
  build:
   runs-on: ubuntu-latest
+  
   steps:
    - name: Checkout
      uses: actions/checkout@v4
-
    - name: Setup Java
      uses: actions/setup-java@v4
      with:
       distribution: 'temurin'
       java-version: '17'
-
+   - name: Setup Android SDK
+     uses: android-actions/setup-android@v4
+     with:
+      packages: ''
+   - name: Add Android SDK tools to PATH
+     run: |
+      echo "$ANDROID_SDK_ROOT/cmdline-tools/20.0/bin" >> "$GITHUB_PATH"
+      echo "$ANDROID_SDK_ROOT/platform-tools" >>> "$GITHUB_PATH"
    - name: Setup Gradle
      uses: gradle/actions/setup-gradle@v3
-
    - name: Install Android CMake and NDK
      run: |
-      sdkmanager "cmake;3.18.1" "ndk;23.1.7779620"
-  
+      sdkmanager --install "cmake;3.18.1" "ndk; 23.1.7779620"
    - name: Build Module
      run: |
-       chmod +x gradlew
-       ./gradlew :module:assembleRelease
-
+      chmod +x gradlew
+      ./gradlew : module:assembleRelease
    - name: Upload ZIP
      uses: actions/upload-artifact@v4
      with:
